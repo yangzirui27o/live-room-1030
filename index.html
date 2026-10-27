@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>祎晖的直播间</title>
+<style>
+/* ========= 要改的内容都在下面的 CONFIG 里，这里是样式 ========= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; color: #fff; }
+
+/* 两侧：同一张照片放大虚化 */
+.bg { position: fixed; inset: -6vh; background-size: cover; background-position: center;
+  filter: blur(4vh) brightness(.45) saturate(1.2); }
+.bg.empty { background: radial-gradient(circle at 30% 30%, #4a3a12, #120d03 70%); filter: none; }
+.side { position: fixed; top: 50%; transform: translateY(-50%); width: calc((100vw - 56.25vh) / 2);
+  text-align: center; color: rgba(255,255,255,.85); }
+.side.left { left: 0; } .side.right { right: 0; }
+.side .big { font-size: 6vh; font-weight: 800; letter-spacing: .4vh; color: #FFD100; text-shadow: 0 .4vh 2vh rgba(0,0,0,.5); }
+.side .small { font-size: 2.4vh; margin-top: 1.6vh; opacity: .8; letter-spacing: .3vh; }
+
+/* 中间：竖屏直播间 */
+.room { position: fixed; top: 0; left: 50%; transform: translateX(-50%); height: 100vh; width: 56.25vh;
+  overflow: hidden; background: #222; box-shadow: 0 0 6vh rgba(0,0,0,.6); }
+.roomBg { position: absolute; inset: -4vh; background-size: cover; background-position: center; filter: blur(3vh) brightness(.6); }
+.photo { position: absolute; inset: 0; background-size: cover; background-position: center; background-repeat: no-repeat; }
+.photo.contain { background-size: 100% auto; background-position: center 32%; }
+.photo.empty { background: linear-gradient(160deg, #3b3b3b, #151515); display: flex; align-items: center;
+  justify-content: center; font-size: 2vh; color: #999; text-align: center; line-height: 1.8; }
+.shade-top { position: absolute; left: 0; right: 0; top: 0; height: 22vh;
+  background: linear-gradient(rgba(0,0,0,.55), transparent); }
+.shade-bottom { position: absolute; left: 0; right: 0; bottom: 0; height: 50vh;
+  background: linear-gradient(transparent, rgba(0,0,0,.72)); }
+
+/* 横屏模式：整块电视都是直播间 */
+body.wide .room { left: 0; transform: none; width: 100vw; }
+body.wide .side, body.wide .bg { display: none; }
+body.wide .photo { background-size: cover; background-position: center 55%; }
+body.wide .top { top: 3vh; left: 3vh; right: 3vh; }
+body.wide .tags { top: 10.5vh; left: 3vh; }
+body.wide .danmu { left: 3vh; bottom: 11vh; width: 72vh; height: 34vh; }
+body.wide .cart { right: 3vh; bottom: 11vh; width: 30vh; }
+body.wide .bottom { left: 3vh; right: 3vh; bottom: 2.6vh; }
+body.wide .input { flex: none; width: 46vh; }
+body.wide .bottom .icon:nth-child(2) { margin-left: auto; }
+body.wide .hearts { right: 9vh; bottom: 48vh; }
+body.wide .shade-bottom { height: 45vh; }
+.slogan { display: none; }
+body.wide .slogan { display: block; position: absolute; top: 3.4vh; left: 50%; transform: translateX(-50%); text-align: center;
+  text-shadow: 0 .3vh 1.5vh rgba(0,0,0,.6); }
+body.wide .slogan b { display: block; font-size: 4.4vh; color: #FFD100; letter-spacing: .5vh; }
+body.wide .slogan span { display: block; font-size: 1.8vh; margin-top: .6vh; letter-spacing: .3vh; }
+
+/* 顶部 */
+.top { position: absolute; top: 2.2vh; left: 1.6vh; right: 1.6vh; display: flex; align-items: center; }
+.anchor { display: flex; align-items: center; background: rgba(0,0,0,.35); border-radius: 4vh; padding: .5vh 1.8vh .5vh .5vh; }
+.avatar { width: 4.6vh; height: 4.6vh; border-radius: 50%; background: #FFD100 center/cover; border: .25vh solid #FFD100;
+  display: flex; align-items: center; justify-content: center; color: #222; font-weight: 800; font-size: 2.2vh; }
+.anchor .name { margin-left: 1vh; }
+.anchor .name b { display: block; font-size: 2vh; }
+.anchor .name span { display: block; font-size: 1.4vh; opacity: .85; margin-top: .2vh; }
+.follow { margin-left: 1.4vh; background: #FFD100; color: #222; font-size: 1.6vh; font-weight: 700;
+  border-radius: 3vh; padding: .7vh 1.4vh; }
+.viewers { margin-left: auto; display: flex; align-items: center; }
+.viewers .heads { display: flex; margin-right: .8vh; }
+.viewers .heads i { width: 3.4vh; height: 3.4vh; border-radius: 50%; margin-left: -1vh; border: .2vh solid #fff3;
+  font-style: normal; font-size: 1.4vh; display: flex; align-items: center; justify-content: center; color: #222; font-weight: 700; }
+.viewers .count { background: rgba(0,0,0,.35); border-radius: 3vh; padding: .7vh 1.3vh; font-size: 1.6vh; }
+.close { margin-left: 1vh; font-size: 2.6vh; opacity: .9; }
+.tags { position: absolute; top: 8.6vh; left: 1.6vh; display: flex; gap: .8vh; }
+.tag { background: rgba(0,0,0,.35); border-radius: 2vh; padding: .5vh 1.2vh; font-size: 1.5vh; }
+.tag.hot { background: linear-gradient(90deg, #FF7A00, #FF3D3D); }
+
+/* 左下弹幕 */
+.danmu { position: absolute; left: 1.6vh; bottom: 9vh; width: 28.5vh; height: 38vh; overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%);
+  display: flex; flex-direction: column; justify-content: flex-end; }
+.msg { align-self: flex-start; background: rgba(0,0,0,.32); border-radius: 1.6vh; padding: .75vh 1.3vh; margin-top: .8vh;
+  font-size: 1.75vh; line-height: 1.45; max-width: 100%; animation: pop .45s ease-out; }
+.msg .who { color: #FFE27A; font-weight: 600; margin-right: .5vh; }
+.msg.enter { background: rgba(255,209,0,.18); }
+@keyframes pop { from { transform: translateY(2vh); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* 右下购物车 */
+.cart { position: absolute; right: 1.6vh; bottom: 9vh; width: 22.5vh; display: flex; flex-direction: column; gap: .9vh; }
+.goods { background: #fff; color: #222; border-radius: 1.2vh; overflow: hidden; box-shadow: 0 .6vh 2vh rgba(0,0,0,.35);
+  display: flex; align-items: stretch; }
+.goods .pic { width: 7.4vh; flex: none; display: flex; align-items: center; justify-content: center; font-size: 3.6vh; position: relative; }
+.goods .badge { position: absolute; top: 0; left: 0; font-size: 1.05vh; color: #fff; border-radius: 0 0 .8vh 0; padding: .25vh .6vh;
+  background: linear-gradient(90deg, #FF7A00, #FF3D3D); white-space: nowrap; }
+.goods .info { flex: 1; padding: .9vh 1vh; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+.goods .title { font-size: 1.55vh; font-weight: 700; line-height: 1.35; }
+.goods .row { display: flex; align-items: center; justify-content: space-between; margin-top: .6vh; }
+.goods .price { color: #FF3D3D; font-weight: 800; font-size: 1.6vh; }
+.goods .btn { background: #FFD100; border-radius: 2vh; font-size: 1.25vh; font-weight: 700; padding: .4vh .9vh; }
+
+.goods .pic img { width: 100%; height: 100%; object-fit: cover; }
+.goods .pic img[src*="award"] { object-fit: contain; padding: .5vh; }
+.tag.logo { background: rgba(255,255,255,.92); padding: .35vh 1vh; display: flex; align-items: center; }
+.tag.logo img { height: 2vh; display: block; }
+
+/* 点赞飘心 */
+.hearts { position: absolute; right: 4vh; bottom: 50vh; width: 8vh; height: 30vh; pointer-events: none; }
+.heart { position: absolute; bottom: 0; font-size: 3vh; animation: rise 3.2s ease-out forwards; }
+@keyframes rise { 0% { transform: translate(0,0) scale(.6); opacity: 0; } 15% { opacity: 1; }
+  100% { transform: translate(var(--dx), -28vh) scale(1.2); opacity: 0; } }
+
+/* 底部 */
+.bottom { position: absolute; left: 1.6vh; right: 1.6vh; bottom: 2.2vh; display: flex; align-items: center; gap: 1vh; }
+.input { flex: 1; background: rgba(0,0,0,.4); border-radius: 3vh; padding: 1.25vh 1.8vh; font-size: 1.8vh; color: #fff; }
+.input b { color: #FFD100; }
+.icon { width: 5vh; height: 5vh; border-radius: 50%; background: rgba(0,0,0,.4); display: flex; align-items: center;
+  justify-content: center; font-size: 2.4vh; position: relative; }
+.icon.cart-icon { background: #FFD100; }
+.icon .num { position: absolute; top: -.4vh; right: -.4vh; background: #FF3D3D; font-size: 1.1vh; border-radius: 1vh; padding: .1vh .6vh; color: #fff; }
+</style>
+</head>
+<body>
+<div class="bg" id="bg"></div>
+<div class="side left"><div class="big" id="sideL"></div><div class="small" id="sideL2"></div></div>
+<div class="side right"><div class="big" id="sideR"></div><div class="small" id="sideR2"></div></div>
+
+<div class="room">
+  <div class="roomBg" id="roomBg"></div>
+  <div class="photo" id="photo"></div>
+  <div class="shade-top"></div><div class="shade-bottom"></div>
+
+  <div class="top">
+    <div class="anchor">
+      <div class="avatar" id="avatar"></div>
+      <div class="name"><b id="title"></b><span id="subtitle"></span></div>
+      <div class="follow">已关注</div>
+    </div>
+    <div class="viewers"><div class="heads" id="heads"></div><div class="count" id="count"></div></div>
+    <div class="close">×</div>
+  </div>
+  <div class="tags" id="tags"></div>
+  <div class="slogan"><b id="sloganB"></b><span id="sloganS"></span></div>
+
+  <div class="danmu" id="danmu"></div>
+  <div class="hearts" id="hearts"></div>
+  <div class="cart" id="cart"></div>
+
+  <div class="bottom">
+    <div class="input" id="input"></div>
+    <div class="icon">💬</div>
+    <div class="icon">🎁</div>
+    <div class="icon cart-icon">🛒<span class="num" id="cartNum"></span></div>
+  </div>
+</div>
+
+<script>
+/* ===================== 只改这里 ===================== */
+const CONFIG = {
+  photo: "photo.jpg",              // 把祎晖的照片或团队合影放在同一个文件夹，命名为 photo.jpg
+  layout: "wide",                  // "wide" 横屏：整块电视都是直播间，适合横的合影；"portrait" 竖屏：中间竖屏直播间，适合竖图
+  photoMode: "contain",            // 竖图 / 单人照用 "cover"（铺满）；横的合影用 "contain"（完整显示在上半部分，背后虚化填充）
+  logo: "assets/logo.png",           // 美团智播 logo，来自宣传页 digihuman.meituan.com
+  avatar: "",                      // 头像图片文件名，留空就显示「晖」字
+  title: "祎晖的直播间",
+  subtitle: "美团智播 · 开播 3 年",
+  teamSize: 18,                    // 在线人数 = 团队人数（含祎晖）
+  tags: ["🔥 团队人气榜 No.1"],
+  input: "下播不下线",
+  sideLeft: ["开播 3 年", "数字人直播 · 基础直播"],
+  sideRight: ["下播不下线", "2026.10.30"],
+  sloganSub: "感谢一路带队",
+  // 每人一句，按顺序循环滚动。往里加就行，一行一个 ["名字", "一句话"]
+  danmu: [
+    ["王佳奇", "主播下播了，数字人还在 7×24 小时替你在线"],
+    ["王欢", "将天赋带到新战场，继续乘风破浪，业绩狂飙，期待我们顶峰再会"],
+    ["刘旭东", "捏主播、捏视频、捏直播，三年一起捏出来的"],
+    ["王慧瑶", "三年前一起开的第一场播，我一直是头号观众"],
+    ["郑鑫", "数字人从免费送到商家愿意掏钱，这一步是你带着走出来的"],
+    ["黄彩云", "评测分一季比一季高，背后是你一直在推"],
+    ["王思奇", "直播间装修得再好看，也没有这个团队好看"],
+    ["王昱静", "数字人的脸和嘴都是我们捏的，心是你给的"],
+    ["杨子锐", "进直播间两周主播就下播了，关注不取消"],
+  ],
+  // 购物车商品：img 是商品图（没有就用 emoji），badge 是左上角小标签
+  goods: [
+    { img: "assets/avatar-ai.png", badge: "讲解中", title: "自研数字人模型", price: "3 年心血", btn: "已拥有" },
+    { img: "assets/award.png", bg: "#FFF8E6", badge: "平台靠前", title: "直播产品中心", price: "无价", btn: "已抢光" },
+    { img: "assets/zhibo.png", badge: "7×24 在线", title: "美团智播", price: "亲手带大", btn: "常驻" },
+    { emoji: "🫶", bg: "#FFE3E3", badge: "仅此一份", title: "一群舍不得你的人", price: "不退不换", btn: "带走" },
+  ],
+};
+/* =================================================== */
+
+const $ = id => document.getElementById(id);
+const img = new Image();
+img.onload = () => {
+  const u = `url("${CONFIG.photo}")`;
+  $("photo").style.backgroundImage = u; $("bg").style.backgroundImage = u; $("roomBg").style.backgroundImage = u;
+  if (CONFIG.photoMode === "contain") $("photo").classList.add("contain");
+};
+img.onerror = () => { $("photo").classList.add("empty"); $("photo").innerHTML = "把照片放到同一文件夹<br>命名为 photo.jpg"; $("bg").classList.add("empty"); };
+img.src = CONFIG.photo;
+
+if (CONFIG.layout === "wide") document.body.classList.add("wide");
+$("sloganB").textContent = CONFIG.sideRight[0]; $("sloganS").textContent = `${CONFIG.sloganSub} · ${CONFIG.sideRight[1]}`;
+if (CONFIG.avatar) $("avatar").style.backgroundImage = `url("${CONFIG.avatar}")`; else $("avatar").textContent = "晖";
+$("title").textContent = CONFIG.title;
+$("subtitle").textContent = CONFIG.subtitle;
+$("count").textContent = `${CONFIG.teamSize} 人在线`;
+const colors = ["#FFD100", "#FFB4B4", "#B4DCFF"];
+const names = CONFIG.danmu.map(d => d[0]).filter(n => n !== "名字");
+$("heads").innerHTML = colors.map((c, i) => `<i style="background:${c}">${(names[i] || "队")[0]}</i>`).join("");
+$("tags").innerHTML = (CONFIG.logo ? `<span class="tag logo"><img src="${CONFIG.logo}"></span>` : "")
+  + CONFIG.tags.map((t, i) => `<span class="tag ${i === 0 ? "hot" : ""}">${t}</span>`).join("");
+$("input").innerHTML = `<b>${CONFIG.input}</b>`;
+$("sideL").textContent = CONFIG.sideLeft[0]; $("sideL2").textContent = CONFIG.sideLeft[1];
+$("sideR").textContent = CONFIG.sideRight[0]; $("sideR2").textContent = CONFIG.sideRight[1];
+$("cartNum").textContent = CONFIG.goods.length;
+$("cart").innerHTML = CONFIG.goods.map(g => `
+  <div class="goods"><div class="pic" style="background:${g.bg || "#eee"}">${g.img ? `<img src="${g.img}">` : g.emoji}<span class="badge">${g.badge}</span></div>
+  <div class="info"><div class="title">${g.title}</div>
+  <div class="row"><span class="price">${g.price}</span><span class="btn">${g.btn}</span></div></div></div>`).join("");
+
+// 弹幕：先铺满一屏，再每 1.8 秒进一条
+const box = $("danmu"); let idx = 0;
+function addMsg() {
+  const [who, text] = CONFIG.danmu[idx % CONFIG.danmu.length]; idx++;
+  const el = document.createElement("div"); el.className = "msg";
+  el.innerHTML = `<span class="who">${who}</span>${text}`;
+  box.appendChild(el);
+  while (box.children.length > 9) box.removeChild(box.firstChild);
+}
+const enter = document.createElement("div"); enter.className = "msg enter";
+enter.innerHTML = `<span class="who">全体成员</span>来了`; box.appendChild(enter);
+for (let i = 0; i < Math.min(6, CONFIG.danmu.length); i++) addMsg();
+setInterval(addMsg, 1800);
+
+// 飘心
+const hearts = ["❤️", "💛", "🧡", "💖", "👍"];
+setInterval(() => {
+  const h = document.createElement("div"); h.className = "heart";
+  h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+  h.style.setProperty("--dx", `${(Math.random() - .5) * 8}vh`);
+  $("hearts").appendChild(h); setTimeout(() => h.remove(), 3300);
+}, 450);
+</script>
+</body>
+</html>
